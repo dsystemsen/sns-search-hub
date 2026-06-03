@@ -179,9 +179,14 @@ input[type="checkbox"] { width: auto; }
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1.5rem;
-  background: #ffd400;
-  border-bottom: 1px solid var(--border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border-bottom: 1px solid var(--glass-brd);
   gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .tenant-name { font-weight: 600; }
 .user-info {
@@ -705,4 +710,141 @@ input[type="checkbox"] { width: auto; }
   .calendar-date { font-size: 0.75rem; }
   h1 { font-size: 1.3rem; }
   h2 { font-size: 1.05rem; }
+}
+
+/* ===================================================================
+   Bento Grid + Glassmorphism (ダッシュボード)
+=================================================================== */
+:root,
+:root[data-theme="light"] {
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-brd: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 10px 34px -14px rgba(20, 33, 58, 0.28);
+  --glass-sheen: rgba(255, 255, 255, 0.9);
+}
+:root[data-theme="dark"] {
+  --glass-bg: rgba(255, 255, 255, 0.055);
+  --glass-brd: rgba(255, 255, 255, 0.12);
+  --glass-shadow: 0 16px 40px -16px rgba(0, 0, 0, 0.6);
+  --glass-sheen: rgba(255, 255, 255, 0.35);
+}
+
+/* ガラスが映えるよう、コンテンツ背景にオーロラ (ダーク時に顕著) */
+:root[data-theme="dark"] .content {
+  background:
+    radial-gradient(38% 30% at 12% 0%, rgba(59, 130, 246, 0.16), transparent 70%),
+    radial-gradient(34% 30% at 92% 8%, rgba(236, 72, 153, 0.12), transparent 70%),
+    radial-gradient(46% 42% at 60% 108%, rgba(139, 92, 246, 0.16), transparent 72%),
+    var(--bg);
+}
+:root[data-theme="light"] .content {
+  background:
+    radial-gradient(40% 30% at 10% 0%, rgba(37, 99, 235, 0.07), transparent 70%),
+    radial-gradient(34% 30% at 94% 6%, rgba(236, 72, 153, 0.06), transparent 70%),
+    var(--bg);
+}
+
+.dashboard-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.dashboard-head .muted { font-size: 0.9rem; }
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(120px, auto);
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+.bento-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-brd);
+  border-radius: 20px;
+  padding: 1.4rem 1.5rem;
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  position: relative;
+  overflow: hidden;
+}
+/* ガラスの上端ハイライト */
+.bento-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--glass-sheen), transparent);
+}
+.bento-card.col-2 { grid-column: span 2; }
+.bento-card.col-3 { grid-column: span 3; }
+.bento-card.col-4 { grid-column: span 4; }
+.bento-card.row-2 { grid-row: span 2; }
+
+.bento-eyebrow {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.bento-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 0.75rem; }
+.bento-stat {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0.5rem 0 0.25rem;
+}
+.bento-actions { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 0.25rem; }
+.bento-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--glass-brd);
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.bento-link:hover {
+  text-decoration: none;
+  transform: translateY(-1px);
+  background: var(--surface);
+}
+.bento-link span.arrow { color: var(--primary); }
+.bento-steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.bento-card .data-table { margin-top: 0; background: transparent; border: none; }
+.bento-card .data-table th { background: transparent; }
+
+@media (max-width: 900px) {
+  .bento-grid { grid-template-columns: repeat(2, 1fr); }
+  .bento-card.col-3,
+  .bento-card.col-4 { grid-column: span 2; }
+  .bento-card.col-2 { grid-column: span 2; }
+  .bento-card.row-2 { grid-row: span 1; }
+}
+@media (max-width: 600px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .bento-card.col-2,
+  .bento-card.col-3,
+  .bento-card.col-4 { grid-column: span 1; }
+  .bento-stat { font-size: 2.1rem; }
 }

@@ -8,7 +8,8 @@ function detectPreferred(): Theme {
   if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // 既定はダークモード (ユーザーがトグルで切り替えた場合はその選択を尊重)
+  return "dark";
 }
 
 type ThemeCtx = { theme: Theme; toggle: () => void; set: (t: Theme) => void };
