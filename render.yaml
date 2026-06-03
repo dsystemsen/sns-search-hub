@@ -1,0 +1,82 @@
+# Render Blueprint — YouTube分析SaaS (React + Django)
+# Render ダッシュボードで「Blueprints」→このリポジトリを接続すると、
+# 下記サービスが一括作成されます。
+#
+# MVP 構成: API(Django) + PostgreSQL + フロント(静的)。
+# Celery/Redis は使わず同期実行 (CELERY_TASK_ALWAYS_EAGER=True)。
+# 裏処理を本格運用する場合は、別途 Redis(Key Value) と Background Worker を追加し、
+# API の CELERY_TASK_ALWAYS_EAGER を False、REDIS_URL を設定してください。
+
+databases:
+  - name: yt-analytics-db
+    databaseName: yt_analytics
+    user: yt_analytics
+    plan: free # ※本番は basic 以上へ。free は約30日で失効します。
+
+services:
+  # ---------- バックエンド (Django REST API) ----------
+  - type: web
+    name: yt-analytics-api
+    runtime: python
+    rootDir: backend
+    plan: free # ※free はアイドルでスリープ→初回アクセスが遅い。本番は starter 推奨。
+    buildCommand: "pip install -r requirements-prod.txt && python manage.py collectstatic --no-input && python manage.py migrate --no-input"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.4"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "http://localhost:5173"
+      # フロントの onrender.com ドメインを正規表現で許可 (URL確定前でも動く)
+      - key: CORS_ALLOWED_ORIGIN_REGEXES
+        value: "https://.*\\.onrender\\.com$"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: CELERY_TASK_ALWAYS_EAGER
+        value: "True"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: yt-analytics-db
+          property: connectionString
+      # ↓ 値は Render ダッシュボードで各自設定 (sync: false)
+      - key: APP_BASE_URL
+        sync: false # 例: https://yt-analytics-web.onrender.com
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_DEMO_MODE
+        value: "True"
+
+  # ---------- フロントエンド (React/Vite 静的サイト) ----------
+  - type: web
+    name: yt-analytics-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22.12.0"
+      # API の URL + /api を設定 (例: https://yt-analytics-api.onrender.com/api)
+      - key: VITE_API_BASE_URL
+        sync: false
+    routes:
+      # SPA: すべてのパスを index.html へ (React Router 用)
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: "public, max-age=31536000, immutable"

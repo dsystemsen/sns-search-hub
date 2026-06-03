@@ -1,0 +1,14 @@
+Django==5.2.*
+djangorestframework==3.16.*
+djangorestframework-simplejwt==5.5.*
+django-cors-headers==4.7.*
+django-environ==0.13.*
+django-filter==25.1
+celery==5.5.*
+redis==5.2.*
+openpyxl==3.1.*
+gunicorn==23.0.*
+whitenoise==6.7.*
+stripe==11.4.*
+Janome==0.5.*
+requests==2.34.*

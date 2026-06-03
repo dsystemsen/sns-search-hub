@@ -1,0 +1,36 @@
+/* ===================================================================
+   Aceternity UI 用 Tailwind セットアップ
+   既存の素CSSデザインを壊さないため preflight(base リセット) は読み込まず、
+   theme(変数) と utilities のみを取り込む。
+=================================================================== */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* アプリは <html data-theme="dark"> でテーマ切替 → Tailwind の dark: をそれに対応させる */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Aurora アニメーション (animate-aurora ユーティリティを生成) */
+@theme {
+  --animate-aurora: aurora 60s linear infinite;
+}
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+/* Aceternity コンポーネントが参照する素の CSS 変数 (Tailwind v4 既定は --color-* のため別途定義) */
+:root {
+  --white: #ffffff;
+  --black: #000000;
+  --transparent: transparent;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --indigo-300: #a5b4fc;
+  --violet-200: #ddd6fe;
+}
